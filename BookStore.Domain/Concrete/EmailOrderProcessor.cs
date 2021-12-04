@@ -1,0 +1,102 @@
+﻿using BookStore.Domain.Abstract;
+using BookStore.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Mail;
+
+namespace BookStore.Domain.Concrete
+{//этот класс имеет все настройки, предназначенные для конфигурирования
+    //классов .NET которые работают с электронной почтой и требуются
+    //конструктору EmailOrderProcessor
+
+    public class EmailSettings
+    {
+        public string MailToAddress = "orders@example.com";
+        public string MailFromAddress = "bookstore@example.com";
+        public bool UseSsl = true;
+        public string Username = "MySmtpUsername";
+        public string Password = "MySmtpPassword";
+        public string ServerName = "smtp.example.com";
+        public int ServerPort = 587;
+        //если установить WriteAsFile = true, то сообщения электронной почты
+        //будут записываться в файлы внутри каталога,
+        //указанного в св-ве FileLocation
+        //этот каталог должен существовать и разреша в него запись
+        public bool WriteAsFile = true;
+        public string FileLocation = @"c:\book_store_emails";
+    }
+    public class EmailOrderProcessor : IOrderProcessor
+    {
+        //записываемые файлы будут иметь расширение .eml и могут быть прочитаны
+        //текстовым редактором
+        private EmailSettings emailSettings;
+        public EmailOrderProcessor(EmailSettings settings)
+        {
+            emailSettings = settings;
+        }
+
+        public void ProcessorOrder(Cart cart, ShippingDetails shippingDetails)
+        {
+            using (var smtpClient=new SmtpClient())
+            {
+                smtpClient.EnableSsl = emailSettings.UseSsl;
+                smtpClient.Host = emailSettings.ServerName;
+                smtpClient.Port = emailSettings.ServerPort;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new NetworkCredential(emailSettings.Username, emailSettings.Password);
+
+                if (emailSettings.WriteAsFile)
+                {
+                    smtpClient.DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory;
+                    smtpClient.PickupDirectoryLocation = emailSettings.FileLocation;
+                    smtpClient.EnableSsl = false;
+                }
+
+                StringBuilder body = new StringBuilder()
+                    .AppendLine("Новый заказ обработан")
+                    .AppendLine("------")
+                    .AppendLine("Товары:");
+                foreach(var line in cart.Lines)
+                {
+                    var subtotal = line.Book.Price * line.Quantity;
+
+                    body.AppendFormat("{0} x {1} (итого: {2:c}",
+                         line.Quantity, line.Book.Name, subtotal);
+                }
+
+                body.AppendFormat("Общая стоимость: {0:c}", cart.ComputeTotalValue())
+                    .AppendLine("---")
+                    .AppendLine("Доставка:")
+                    .AppendLine(shippingDetails.Name)
+                    .AppendLine(shippingDetails.Line1)
+                    .AppendLine(shippingDetails.Line2 ?? "")
+                    .AppendLine(shippingDetails.Line3 ?? "")
+                    .AppendLine(shippingDetails.City)
+                    .AppendLine(shippingDetails.Country)
+                    .AppendLine("---")
+                    .AppendFormat("Подарочная упаковка: {0}",
+                        shippingDetails.GiftWrap ? "Да" : "Нет");
+
+                MailMessage mailMessage = new MailMessage(
+                                       emailSettings.MailFromAddress,	// От кого
+                                       emailSettings.MailToAddress,		// Кому
+                                       "Новый заказ отправлен!",		// Тема
+                                       body.ToString()); 				// Тело письма
+
+                if (emailSettings.WriteAsFile)
+                {
+                    mailMessage.BodyEncoding = Encoding.UTF8;
+                }
+
+                smtpClient.Send(mailMessage);
+                //имея реализацию интерфейса IOrderProcessor можно воспользоваться
+                //Ninject для создания экземпляров этой реализации
+                //см NinjectDependencyResolver в WebUI
+            }
+        }
+    }
+}

@@ -1,0 +1,86 @@
+﻿@model BookStore.Domain.Entities.ShippingDetails
+
+@{
+    ViewBag.Title = "BookStore: : форма заказа";
+}
+
+<h2>Оформить заказ сейчас</h2>
+<p>Пожалуйста введи ваши контактные данные, и мы сразу отправим товар!</p>
+
+
+@using (Html.BeginForm())
+{@Html.ValidationSummary();
+<h3>Данные</h3>
+<div class="form-group">
+    <label>Ваше имя:</label>
+    @Html.TextBoxFor(x => x.Name, new { @class = "form-control" })
+</div>
+
+<h3>Адрес доставки</h3>
+//статическое сво=во ViewData.ModelMetadata возвращает объект Metadata,
+//который предоставляет информацию о типе модели для представления
+//св-во Properties, применяемое в цикле foreach возвращает коллекцию объектов
+//ModelMetadata каждый из которых представляет св-во, определенное в типе модели.
+//Свойство PropertyName используется используется, что бы гарантировать отсутствие
+//генерации содержимого для сво-ва Name  или GiftWrap, которое обрабатывается в другом месте представленияhtlcnfdktybz
+//и генерировать набор элементов, дополненных классами Bootstrap для всех
+//остальных св-в
+//Применяемые ключевые слова for и if находятся внутри области действия выражения Razor
+//(выражения @using, которое создает форму), поэтому снабжать их префиксом в виде символа @ не нужно.
+
+foreach (var property in ViewData.ModelMetadata.Properties)
+{
+    if (property.PropertyName != "Name" && property.PropertyName != "GiftWrap")
+    {
+        <div class="form-group">
+            <label>
+                @(property.DisplayName ?? property.PropertyName)
+            </label>
+            @Html.TextBox(property.PropertyName, null, new { @class = "form-control" })
+        </div>
+    }
+}
+
+
+
+////этот код содержит много повторяющейся разметки. В MVC Framework имеются
+////вспомагательные методы HTMLб которые могли бы сократить дублирование
+////для получения метаданных об объекте модели представления и объединим их с
+////помощью комбинации выражения C# Razor
+
+@*<div class="form-group">
+        <label>Первый адрес:</label>
+        @Html.TextBoxFor(x => x.Line1, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>Второй адрес:</label>
+        @Html.TextBoxFor(x => x.Line2, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>Третий адрес:</label>
+        @Html.TextBoxFor(x => x.Line3, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>Город:</label>
+        @Html.TextBoxFor(x => x.City, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        <label>Страна:</label>
+        @Html.TextBoxFor(x => x.Country, new { @class = "form-control" })
+    </div>*@
+
+<h3>Опции</h3>
+<div class="checkbox">
+    <label>
+        @Html.EditorFor(x => x.GiftWrap)
+        Использовать подарочную упаковку?
+    </label>
+</div>
+
+<div class="text-center">
+    <input class="btn btn-primary" type="submit" value="Обработать заказ" />
+</div>
+}
+
+
+

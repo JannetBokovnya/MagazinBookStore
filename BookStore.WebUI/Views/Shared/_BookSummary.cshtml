@@ -1,0 +1,92 @@
+﻿@model BookStore.Domain.Entities.Book
+
+<div class="well">
+    @*@if (Model.ImageData != null)
+        {
+            <div class="pull-left" style="margin-right: 10px">
+                <img class="img-thumbnail" width="75" height="75"
+                     src="@Url.Action("GetImage", "Book",
+                    new { Model.BookId })" />
+            </div>
+        }
+
+        <h3>
+            <strong>@Model.Name</strong>
+            <span class="pull-right label label-primary">@Model.Price.ToString("# грн")</span>
+        </h3>
+        @using (Html.BeginForm("AddToCart", "Cart"))
+        {
+            <div class="pull-right">
+                @Html.HiddenFor(x => x.BookId)
+                @Html.Hidden("returnUrl", Request.Url.PathAndQuery)
+                <input type="submit" class="btn btn-success" value="Добавить в корзину" />
+            </div>
+        }
+        <span class="lead">@Model.Description</span>*@
+
+
+    @*@if (Model.ImageData != null)
+    {
+        <div class="pull-left" style="margin-right: 10px">
+            <img class="img-thumbnail" width="75" height="75"
+                 src="@Url.Action("GetImage", "Book",
+                new { Model.BookId })" />
+        </div>
+    }*@
+
+    <div class="row">
+       
+
+
+        <div class="col-xs-10">
+            @if (Model.ImageData != null)
+            {
+                <div class="pull-left" style="margin-right: 10px">
+                    <img class="img-thumbnail" width="75" height="75"
+                         src="@Url.Action("GetImage", "Book",
+                new { Model.BookId })" />
+                </div>
+            }
+            <h3>
+                <strong>@Model.Name</strong>
+            </h3>
+            <h4>
+                <strong>@Model.Author</strong>
+            </h4>
+        </div>
+        <div class="col-xs-2">
+            <h3>
+                <strong id="price" class="pull-right label label-primary">
+                    @Model.Price.ToString("# грн")
+                </strong>
+            </h3>
+            @using (Html.BeginForm("AddToCart", "Cart"))
+            {
+                <div class="pull-right">
+                    @Html.HiddenFor(x => x.BookId)
+                    @Html.Hidden("returnUrl", Request.Url.PathAndQuery)
+                    <input type="submit" class="btn btn-success" value="Добавить в корзину" />
+                </div>
+            }
+        </div>
+    </div>
+    <span class="lead">@Model.Description</span>
+</div>
+
+    @*//отправка этой формы приводик к вызову метода
+        //действия AddToCart() из контроллера Cart
+        //по умолчанию вспомогательный метод BeginForm
+        //создает формуБ которая использует TTTP метод POST
+        //используя метод BeginForm() означает что каждая кнопка
+        //"Добавить в кор" визуализируется в собственном отдельном
+        //HTML элементе <form> в MVC количество форм, которые
+        //можно создавать ничем не ограничено*@
+    @*@using (Html.BeginForm("AddToCart", "Cart"))
+        {
+            <div class="pull-right">
+                @Html.HiddenFor(x=> x.BookId)
+                @Html.Hidden("returnUrl", Request.Url.PathAndQuery)
+                <input type="submit" class="btn btn-success" value="Добавить в корзину"/>
+            </div>
+        }
+        </>*@
